@@ -54,6 +54,7 @@ class ML_Classification:
         # 데이터 변수 입력
         self.data = pd.read_csv(self.data_location_aug) # 증강 데이터
         self.data_ori = pd.read_csv(self.data_location_ori) # 원본 데이터
+        self.len_data = len(data_ori)
         self.eval_index = []
 
 
@@ -76,11 +77,12 @@ class ML_Classification:
         self.train_data_ori, self.eval_data_ori = train_test_split(data_ori, test_size = 0.3)
         self.eval_data = self.eval_data_ori
         self.train_data = self.train_data_ori
+
     
 
     # 불러온 정제된 데이터 one hot을 str에서 list로 바꾸는 작업
     def labels_to_int(self, aug_mul):
-        data = self.data[: 6152 * aug_mul] 
+        data = self.data[: self.len_data * aug_mul] 
         self.aug_mul = aug_mul
 
         changeChar = ' [],'
@@ -94,7 +96,7 @@ class ML_Classification:
         eval_index_list = list(self.eval_data.index)
         
         for aug_num in range(aug_mul):
-            iidf2 = [i + 6152* aug_num for i in eval_index_list]
+            iidf2 = [i + self.len_data* aug_num for i in eval_index_list]
             self.eval_index = self.eval_index + iidf2
 
         self.train_data = data.drop(self.eval_index)
@@ -130,6 +132,7 @@ class ML_Classification:
 # 원본 데이터 multilabel 학습
 ml = ML_Classification()
 ml.refine_origin_data()
+print(ml.len_data)
 ml.set_model('bert')
 ml.train_model()
 ml.eval_model()
