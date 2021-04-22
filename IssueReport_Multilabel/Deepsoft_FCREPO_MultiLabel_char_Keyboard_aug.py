@@ -11,7 +11,7 @@ import inspect
 import re
 from sklearn.utils import shuffle
 
-dataset_name = 'HADOOP'
+
 
 MDL_LABEL_NUM = 89
 JRA_LABEL_NUM = 142
@@ -33,6 +33,9 @@ class ML_Classification:
     'INFRA': INFRA_LABEL_NUM, 'HIVE': HIVE_LABEL_NUM, 'HBASE': HBASE_LABEL_NUM, 'HADOOP': HADOOP_LABEL_NUM, 'FCREPO': FCREPO_LABEL_NUM, 'CONF': CONF_LABEL_NUM,
      'CB': CB_LABEL_NUM, 'CASSANDRA': CASSANDRA_LABEL_NUM, 'BAM': BAM_LABEL_NUM
      }
+
+    dataset_name = 'FCREPO'
+    augmentation_type = 'char'
     
     def __init__(self, dataset_name = dataset_name, labels_num = labels_Num[dataset_name]):
         self.nlp_model = {'bert': 'bert-base-cased', 'roberta': 'roberta-base', 'xlnet': 'xlnet-base-cased', 'distilbert': 'distilbert-base-cased', 'xlm': 'xlm-roberta-base', 'electra': 'google/electra-base-discriminator'}
@@ -40,11 +43,12 @@ class ML_Classification:
         self.dataset_name = dataset_name
         self.labels_num = labels_num
 
-#       self.data_location = '/home/a22106/python_practice/component_classification/DeepSoft-C/Dataset/Data/{}.csv'.format(self.dataset_name)
-        
-        # 데이터 위치
-        self.data_location_ori = '../Dataset/Deepsoft_IssueData/HADOOP.csv'
-        self.data_location_aug = '../Dataset/Deepsoft_IssueData_Aug/HADOOP_aug_mul4.csv'
+        # 데이터 위치 data location
+        self.data_location_ori = 'Dataset/Deepsoft_IssueData/{}.csv'.format(self.dataset_name)
+        if self.augmentation_type == 'char':
+            self.data_location_aug = 'Dataset/Deepsoft_IssueData_Aug/{}_aug4_{}.csv'.format(self.dataset_name, self.augmentation_type)
+        elif self.augmentation_type == 'word':
+            self.data_location_aug = 'Dataset/Deepsoft_IssueData_Aug/{}_aug10_{}.csv'.format(self.dataset_name, self.augmentation_type)     
         self.aug_mul = 0
 
         # 데이터 변수 입력
@@ -111,7 +115,7 @@ class ML_Classification:
     def set_model(self, nlp_model_name):
         self.nlp_model_name = nlp_model_name
         self.model = MultiLabelClassificationModel(nlp_model_name, self.nlp_model[nlp_model_name], num_labels = self.labels_num, 
-        args = {'output_dir': '/data/a22106/Classify_/Outputs/HADOOP/{}/outputs_char_keyboard_aug{}/'.format(self.nlp_model_name, self.aug_mul), 
+        args = {'output_dir': '/data/a22106/Classify_/Outputs/{}/{}/outputs_{}_keyboard_aug{}/'.format(self.dataset_name, self.nlp_model_name, self.augmentation_type, self.aug_mul), 
         'overwrite_output_dir': False, 'num_train_epochs':100, 'batch_size': 32, 'max_seq_length': 128, 'learning_rate': 5e-5})
 
     def train_model(self):
