@@ -54,7 +54,7 @@ class ML_Classification:
         # 데이터 변수 입력
         self.data = pd.read_csv(self.data_location_aug) # 증강 데이터
         self.data_ori = pd.read_csv(self.data_location_ori) # 원본 데이터
-        self.len_data = len(data_ori)
+        self.len_data = len(self.data_ori)
         self.eval_index = []
 
 
