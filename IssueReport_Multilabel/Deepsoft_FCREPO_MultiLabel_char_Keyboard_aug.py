@@ -35,7 +35,7 @@ class ML_Classification:
      }
 
     dataset_name = 'FCREPO'
-    augmentation_type = 'char'
+    augmentation_type = 'word'
     
     def __init__(self, dataset_name = dataset_name, labels_num = labels_Num[dataset_name]):
         self.nlp_model = {'bert': 'bert-base-cased', 'roberta': 'roberta-base', 'xlnet': 'xlnet-base-cased', 'distilbert': 'distilbert-base-cased', 'xlm': 'xlm-roberta-base', 'electra': 'google/electra-base-discriminator'}
