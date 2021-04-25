@@ -9,8 +9,6 @@ import os
 
 import inspect
 import re
-from sklearn.utils import shuffle
-
 
 
 MDL_LABEL_NUM = 89
@@ -26,31 +24,34 @@ CB_LABEL_NUM = 64
 CASSANDRA_LABEL_NUM = 15
 BAM_LABEL_NUM = 96
 
-class ML_Classification:
-    
-    labels_Num = {'MDL': MDL_LABEL_NUM, 
+labels_Num = {'MDL': MDL_LABEL_NUM, 
     'JRA': JRA_LABEL_NUM, 'ISLANDORA': ISLANDORA_LABEL_NUM, 
     'INFRA': INFRA_LABEL_NUM, 'HIVE': HIVE_LABEL_NUM, 'HBASE': HBASE_LABEL_NUM, 'HADOOP': HADOOP_LABEL_NUM, 'FCREPO': FCREPO_LABEL_NUM, 'CONF': CONF_LABEL_NUM,
      'CB': CB_LABEL_NUM, 'CASSANDRA': CASSANDRA_LABEL_NUM, 'BAM': BAM_LABEL_NUM
      }
 
-    dataset_name = 'FCREPO'
-    augmentation_type = 'word'
-    
-    def __init__(self, dataset_name = dataset_name, labels_num = labels_Num[dataset_name]):
+class ML_Classification:
 
-        self.nlp_model = {'bert': 'bert-base-cased', 'roberta': 'roberta-base', 'xlnet': 'xlnet-base-cased', 'distilbert': 'distilbert-base-cased', 'xlm': 'xlm-roberta-base', 'electra': 'google/electra-base-discriminator'}
-        self.nlp_model_name = 'distilbert'
+    def __init__(self, dataset_name, augmenter_name, augment_size, nlp_model_name):
         self.dataset_name = dataset_name
-        self.labels_num = labels_num
+        self.labels_num = labels_Num[dataset_name]
+
+        if augmenter_name == 'OCR' or augmenter_name == 'Keyboard':
+            self.augmentation_type = 'char'
+        else:
+            self.augmentation_type = 'word'
+
+        self.augmenter_name = augmenter_name
+        self.aug_mul = augment_size
+        self.nlp_model_name = nlp_model_name
+        self.nlp_model = {'bert': 'bert-base-cased', 'roberta': 'roberta-base', 'xlnet': 'xlnet-base-cased', 'distilbert': 'distilbert-base-cased', 'xlm': 'xlm-roberta-base', 'electra': 'google/electra-base-discriminator'}
+
 
         # 데이터 위치 data location
         self.data_location_ori = 'Dataset/Deepsoft_IssueData/{}.csv'.format(self.dataset_name)
-        if self.augmentation_type == 'char':
-            self.data_location_aug = 'Dataset/Deepsoft_IssueData_Aug/{}_aug4_{}.csv'.format(self.dataset_name, self.augmentation_type)
-        elif self.augmentation_type == 'word':
-            self.data_location_aug = 'Dataset/Deepsoft_IssueData_Aug/{}_aug10_{}.csv'.format(self.dataset_name, self.augmentation_type)     
-        self.aug_mul = 0
+
+        self.data_location_aug = 'Dataset/Deepsoft_IssueData_Aug/{}_{}_{}.csv'.format(self.dataset_name, self.augmentation_type, self.augmenter_name)     
+        
 
         # 데이터 변수 입력
         self.data = pd.read_csv(self.data_location_aug) # 증강 데이터
@@ -82,9 +83,8 @@ class ML_Classification:
     
 
     # 불러온 정제된 데이터 one hot을 str에서 list로 바꾸는 작업
-    def labels_to_int(self, aug_mul):
-        data = self.data[: self.len_data * aug_mul] 
-        self.aug_mul = aug_mul
+    def labels_to_int(self):
+        data = self.data[: self.len_data * self.aug_mul] 
 
         changeChar = ' [],'
         for i in range(len(data)):
@@ -96,16 +96,15 @@ class ML_Classification:
         # 증강데이터의 train_data에서 evaluation부분 제거
         eval_index_list = list(self.eval_data.index)
         
-        for aug_num in range(aug_mul):
+        for aug_num in range(self.aug_mul):
             iidf2 = [i + self.len_data* aug_num for i in eval_index_list]
             self.eval_index = self.eval_index + iidf2
 
         self.train_data = data.drop(self.eval_index)
+        self.train_data = self.train_data.sample(frac=1).reset_index(drop=True)
 
-        data = self.data
-
-# train, evaluation 데이터로 나누기 // 사용 안함
-    def split_data_eval(self, random_state = None):
+    # train, evaluation 데이터로 나누기 // 사용 안함
+    def _split_data_eval(self, random_state = None):
         train_data_ori, eval_data_ori = train_test_split(self.data_ori, test_size = 0.3, random_state = random_state)
 
         eval_data_indexList = eval_data_ori.index.append(eval_data_ori.index * 2)
@@ -115,10 +114,9 @@ class ML_Classification:
 
 
 # 모델 parameter 설정
-    def set_model(self, nlp_model_name):
-        self.nlp_model_name = nlp_model_name
-        self.model = MultiLabelClassificationModel(nlp_model_name, self.nlp_model[nlp_model_name], num_labels = self.labels_num, 
-        args = {'output_dir': '/data/a22106/Classify_/Outputs/{}/{}/outputs_{}_keyboard_aug{}/'.format(self.dataset_name, self.nlp_model_name, self.augmentation_type, self.aug_mul), 
+    def set_model(self):
+        self.model = MultiLabelClassificationModel(self.nlp_model_name, self.nlp_model[self.nlp_model_name], num_labels = self.labels_num, 
+        args = {'output_dir': '/data/a22106/Deepsoft_C_Multilabel/{}_{}_{}_{}/'.format(self.dataset_name, self.nlp_model_name, self.augmenter_name, self.aug_mul), 
         'overwrite_output_dir': False, 'num_train_epochs':100, 'batch_size': 32, 'max_seq_length': 128, 'learning_rate': 5e-5})
 
     def train_model(self):
@@ -129,46 +127,31 @@ class ML_Classification:
     
     #def predict(self):
     #    self.preds, self.outputs = self.model.predict(self.test_data)
-# 원본 데이터 multilabel 학습
-ml1 = ML_Classification()
-ml1.refine_origin_data()
-print(ml1.len_data)
-ml1.set_model('bert')
-ml1.train_model()
-ml1.eval_model()
 
-# 2배 augmentation 데이터 multilabel 학습
-ml2 = ML_Classification()
-ml2.refine_origin_data()
-ml2.labels_to_int(2)
-ml2.set_model('bert')
-ml2.train_model()
-ml2.eval_model()
+dataset_name = ['FCREPO', 'HADOOP', 'ISLANDORA']
+# augmenter_name = ["OCR", "Keyboard", "Spelling", "ContextualWordEmbs", "Synonym", "Antonym", "Split"]
+augmenter_name = ["OCR", "Keyboard", "Spelling"]
+nlp_model = ['bert', 'distilbert', 'robert']
 
-ml3 = ML_Classification()
-ml3.refine_origin_data()
-ml3.labels_to_int(3)
-ml3.set_model('bert')
-ml3.train_model()
-ml3.eval_model()
 
-ml4 = ML_Classification()
-ml4.refine_origin_data()
-ml4.labels_to_int(4)
-ml4.set_model('bert')
-ml4.train_model()
-ml4.eval_model()
 
-ml5 = ML_Classification()
-ml5.refine_origin_data()
-ml5.labels_to_int(5)
-ml5.set_model('bert')
-ml5.train_model()
-ml5.eval_model()
+for augmenter in augmenter_name:
+    # 원본 데이터 multilabel 학습
+    ml = ML_Classification('HADOOP', 'OCR', 0, 'distilbert')
+    ml.refine_origin_data()
+    print(ml.len_data)
+    ml.set_model()
+    print(ml.train_data)
+    print(ml.eval_data.sort_index())
+    ml.train_model()
+    ml.eval_model()
 
-ml6 = ML_Classification()
-ml6.refine_origin_data()
-ml6.labels_to_int(6)
-ml6.set_model('bert')
-ml6.train_model()
-ml6.eval_model()
+    for times in range(7, 1, -1):
+        ml = ML_Classification('HADOOP', augmenter, times, 'distilbert')
+        ml.refine_origin_data()
+        ml.labels_to_int()
+        ml.set_model()
+        #print(ml.train_data)
+        #print(ml.eval_data.sort_index())
+        ml.train_model()
+        ml.eval_model()
