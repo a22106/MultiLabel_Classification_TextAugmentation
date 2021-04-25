@@ -133,7 +133,8 @@ class ML_Classification:
 ml = ML_Classification()
 ml.refine_origin_data()
 print(ml.len_data)
-ml.set_model('bert')
+print(type(ml.data_ori['labels'][1]))
+'''ml.set_model('bert')
 ml.train_model()
 ml.eval_model()
 
@@ -172,3 +173,4 @@ ml6.labels_to_int(6)
 ml6.set_model('bert')
 ml6.train_model()
 ml6.eval_model()
+'''
