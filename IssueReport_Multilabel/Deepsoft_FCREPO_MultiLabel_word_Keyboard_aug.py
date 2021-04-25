@@ -130,12 +130,12 @@ class ML_Classification:
     #def predict(self):
     #    self.preds, self.outputs = self.model.predict(self.test_data)
 # 원본 데이터 multilabel 학습
-ml = ML_Classification()
-ml.refine_origin_data()
-print(ml.len_data)
-ml.set_model('bert')
-ml.train_model()
-ml.eval_model()
+ml1 = ML_Classification()
+ml1.refine_origin_data()
+print(ml1.len_data)
+ml1.set_model('bert')
+ml1.train_model()
+ml1.eval_model()
 
 # 2배 augmentation 데이터 multilabel 학습
 ml2 = ML_Classification()
