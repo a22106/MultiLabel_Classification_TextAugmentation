@@ -35,9 +35,10 @@ class ML_Classification:
      }
 
     dataset_name = 'FCREPO'
-    augmentation_type = 'char'
+    augmentation_type = 'word'
     
     def __init__(self, dataset_name = dataset_name, labels_num = labels_Num[dataset_name]):
+
         self.nlp_model = {'bert': 'bert-base-cased', 'roberta': 'roberta-base', 'xlnet': 'xlnet-base-cased', 'distilbert': 'distilbert-base-cased', 'xlm': 'xlm-roberta-base', 'electra': 'google/electra-base-discriminator'}
         self.nlp_model_name = 'distilbert'
         self.dataset_name = dataset_name
@@ -128,7 +129,6 @@ class ML_Classification:
     
     #def predict(self):
     #    self.preds, self.outputs = self.model.predict(self.test_data)
-
 # 원본 데이터 multilabel 학습
 ml = ML_Classification()
 ml.refine_origin_data()
