@@ -84,6 +84,9 @@ class ML_Classification:
 
     # 불러온 정제된 데이터 one hot을 str에서 list로 바꾸는 작업
     def labels_to_int(self):
+        if self.aug_mul <= 1:
+            return        
+
         data = self.data[: self.len_data * self.aug_mul] 
 
         changeChar = ' [],'
@@ -136,22 +139,13 @@ nlp_model = ['bert', 'distilbert', 'robert']
 
 
 for augmenter in augmenter_name:
-    # 원본 데이터 multilabel 학습
-    ml = ML_Classification('HADOOP', 'OCR', 0, 'distilbert')
-    ml.refine_origin_data()
-    print(ml.len_data)
-    ml.set_model()
-    print(ml.train_data)
-    print(ml.eval_data.sort_index())
-    ml.train_model()
-    ml.eval_model()
-
-    for times in range(7, 1, -1):
+    for times in range(1, 8, 2):
         ml = ML_Classification('HADOOP', augmenter, times, 'distilbert')
         ml.refine_origin_data()
+        print(ml.len_data)
         ml.labels_to_int()
         ml.set_model()
-        #print(ml.train_data)
-        #print(ml.eval_data.sort_index())
+        print(ml.train_data)
+        print(ml.eval_data.sort_index())
         ml.train_model()
         ml.eval_model()
