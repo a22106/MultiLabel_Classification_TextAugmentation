@@ -44,7 +44,7 @@ class ML_Classification:
         self.augmenter_name = augmenter_name
         self.aug_mul = augment_size
         self.nlp_model_name = nlp_model_name
-        self.nlp_model = {'bert': 'bert-base-cased', 'roberta': 'roberta-base', 'xlnet': 'xlnet-base-cased', 'distilbert': 'distilbert-base-cased', 'xlm': 'xlm-roberta-base', 'electra': 'google/electra-base-discriminator'}
+        self.nlp_model = {'bert': 'bert-base-uncased', 'roberta': 'roberta-base', 'xlnet': 'xlnet-base-uncased', 'distilbert': 'distilbert-base-uncased', 'xlm': 'xlm-roberta-base', 'electra': 'google/electra-base-discriminator'}
 
 
         # 데이터 위치 data location
@@ -84,6 +84,9 @@ class ML_Classification:
 
     # 불러온 정제된 데이터 one hot을 str에서 list로 바꾸는 작업
     def labels_to_int(self):
+        if self.aug_mul <= 1:
+            return        
+
         data = self.data[: self.len_data * self.aug_mul] 
 
         changeChar = ' [],'
@@ -117,7 +120,7 @@ class ML_Classification:
     def set_model(self):
         self.model = MultiLabelClassificationModel(self.nlp_model_name, self.nlp_model[self.nlp_model_name], num_labels = self.labels_num, 
         args = {'output_dir': '/data/a22106/Deepsoft_C_Multilabel/{}_{}_{}_{}/'.format(self.dataset_name, self.nlp_model_name, self.augmenter_name, self.aug_mul), 
-        'overwrite_output_dir': False, 'num_train_epochs':100, 'batch_size': 32, 'max_seq_length': 128, 'learning_rate': 5e-5})
+        'overwrite_output_dir': False, 'num_train_epochs':70, 'batch_size': 32, 'max_seq_length': 128, 'learning_rate': 5e-5})
 
     def train_model(self):
         self.model.train_model(self.train_data)
@@ -136,22 +139,13 @@ nlp_model = ['bert', 'distilbert', 'robert']
 
 
 for augmenter in augmenter_name:
-    # 원본 데이터 multilabel 학습
-    ml = ML_Classification('HADOOP', 'OCR', 0, 'distilbert')
-    ml.refine_origin_data()
-    print(ml.len_data)
-    ml.set_model()
-    print(ml.train_data)
-    print(ml.eval_data.sort_index())
-    ml.train_model()
-    ml.eval_model()
-
-    for times in range(7, 1, -1):
+    for times in range(1, 8, 2):
         ml = ML_Classification('HADOOP', augmenter, times, 'distilbert')
         ml.refine_origin_data()
+        print(ml.len_data)
         ml.labels_to_int()
         ml.set_model()
-        #print(ml.train_data)
-        #print(ml.eval_data.sort_index())
+        print(ml.train_data)
+        print(ml.eval_data.sort_index())
         ml.train_model()
         ml.eval_model()
