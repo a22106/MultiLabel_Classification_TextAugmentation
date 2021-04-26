@@ -133,7 +133,7 @@ class ML_Classification:
 
 dataset_name = ['FCREPO', 'HADOOP', 'ISLANDORA']
 # augmenter_name = ["OCR", "Keyboard", "Spelling", "ContextualWordEmbs", "Synonym", "Antonym", "Split"]
-augmenter_name = ["OCR", "Keyboard", "Spelling"]
+augmenter_name = ["Keyboard", "Spelling"]
 nlp_model = ['bert', 'distilbert', 'robert']
 
 
