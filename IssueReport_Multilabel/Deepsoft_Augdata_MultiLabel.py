@@ -139,7 +139,7 @@ nlp_model = ['bert', 'distilbert', 'robert']
 
 for dataset in dataset_name:
     for augmenter in augmenter_name:
-        ml = ML_Classification(dataset_name, augmenter, 1, 'distilbert')
+        ml = ML_Classification(dataset, augmenter, 1, 'distilbert')
         ml.refine_origin_data()
         print(ml.len_data)
         ml.labels_to_int()
@@ -149,7 +149,7 @@ for dataset in dataset_name:
         ml.train_model()
         ml.eval_model()
         for times in range(3, 8, 2):
-            ml = ML_Classification(dataset_name, augmenter, times, 'distilbert')
+            ml = ML_Classification(dataset, augmenter, times, 'distilbert')
             ml.refine_origin_data()
             print(ml.len_data)
             ml.labels_to_int()
