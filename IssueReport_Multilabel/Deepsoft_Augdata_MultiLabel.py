@@ -131,16 +131,15 @@ class ML_Classification:
     #def predict(self):
     #    self.preds, self.outputs = self.model.predict(self.test_data)
 
-dataset_name = ['FCREPO', 'HADOOP', 'ISLANDORA']
-# augmenter_name = ["OCR", "Keyboard", "Spelling", "ContextualWordEmbs", "Synonym", "Antonym", "Split"]
-augmenter_name = ["Keyboard", "Spelling"]
+dataset_name = ['FCREPO', 'ISLANDORA']
+augmenter_name = ["OCR", "Keyboard", "Spelling", "ContextualWordEmbs", "Synonym", "Antonym", "Split"]
+#augmenter_name = ["Keyboard", "Spelling"]
 nlp_model = ['bert', 'distilbert', 'robert']
 
 
-
-for augmenter in augmenter_name:
-    for times in range(1, 8, 2):
-        ml = ML_Classification('HADOOP', augmenter, times, 'distilbert')
+for dataset in dataset_name:
+    for augmenter in augmenter_name:
+        ml = ML_Classification(dataset_name, augmenter, 1, 'distilbert')
         ml.refine_origin_data()
         print(ml.len_data)
         ml.labels_to_int()
@@ -149,3 +148,13 @@ for augmenter in augmenter_name:
         print(ml.eval_data.sort_index())
         ml.train_model()
         ml.eval_model()
+        for times in range(3, 8, 2):
+            ml = ML_Classification(dataset_name, augmenter, times, 'distilbert')
+            ml.refine_origin_data()
+            print(ml.len_data)
+            ml.labels_to_int()
+            ml.set_model()
+            print(ml.train_data)
+            print(ml.eval_data.sort_index())
+            ml.train_model()
+            ml.eval_model()
