@@ -120,7 +120,8 @@ class ML_Classification:
     def set_model(self):
         self.model = MultiLabelClassificationModel(self.nlp_model_name, self.nlp_model[self.nlp_model_name], num_labels = self.labels_num, 
         args = {'output_dir': '/data/a22106/Deepsoft_C_Multilabel/{}_{}_{}_{}/'.format(self.dataset_name, self.nlp_model_name, self.augmenter_name, self.aug_mul), 
-        'overwrite_output_dir': False, 'num_train_epochs':70, 'batch_size': 32, 'max_seq_length': 128, 'learning_rate': 5e-5})
+        'overwrite_output_dir': True, 'num_train_epochs': 200, 'train_batch_size': 100, 'eval_batch_size': 100, 'max_seq_length': 128, 'learning_rate': 0.02})
+        
 
     def train_model(self):
         self.model.train_model(self.train_data)
@@ -132,8 +133,8 @@ class ML_Classification:
     #    self.preds, self.outputs = self.model.predict(self.test_data)
 
 dataset_name = ['FCREPO', 'ISLANDORA']
-augmenter_name = ["OCR", "Keyboard", "Spelling", "ContextualWordEmbs", "Synonym", "Antonym", "Split"]
-#augmenter_name = ["Keyboard", "Spelling"]
+#augmenter_name = ["OCR", "Keyboard", "Spelling", "ContextualWordEmbs", "Synonym", "Antonym", "Split"]
+augmenter_name = ["ContextualWordEmbs", "Synonym", "Antonym", "Split"]
 nlp_model = ['bert', 'distilbert', 'robert']
 
 
