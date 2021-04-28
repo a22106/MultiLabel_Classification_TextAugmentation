@@ -48,9 +48,9 @@ class ML_Classification:
 
 
         # 데이터 위치 data location
-        self.data_location_ori = 'Dataset/Deepsoft_IssueData/{}.csv'.format(self.dataset_name)
+        self.data_location_ori = '../Dataset/Deepsoft_IssueData/{}.csv'.format(self.dataset_name)
 
-        self.data_location_aug = 'Dataset/Deepsoft_IssueData_Aug/{}_{}_{}.csv'.format(self.dataset_name, self.augmentation_type, self.augmenter_name)     
+        self.data_location_aug = '../Dataset/Deepsoft_IssueData_Aug/{}_{}_{}.csv'.format(self.dataset_name, self.augmentation_type, self.augmenter_name)     
         
 
         # 데이터 변수 입력
