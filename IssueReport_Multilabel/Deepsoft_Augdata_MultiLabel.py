@@ -48,9 +48,9 @@ class ML_Classification:
 
 
         # 데이터 위치 data location
-        self.data_location_ori = '../Dataset/Deepsoft_IssueData/{}.csv'.format(self.dataset_name)
+        self.data_location_ori = 'Dataset/Deepsoft_IssueData/{}.csv'.format(self.dataset_name)
 
-        self.data_location_aug = '../Dataset/Deepsoft_IssueData_Aug/{}_{}_{}.csv'.format(self.dataset_name, self.augmentation_type, self.augmenter_name)     
+        self.data_location_aug = 'Dataset/Deepsoft_IssueData_Aug/{}_{}_{}.csv'.format(self.dataset_name, self.augmentation_type, self.augmenter_name)     
         
 
         # 데이터 변수 입력
@@ -139,6 +139,8 @@ nlp_model = ['bert', 'distilbert', 'robert']
 
 for dataset in dataset_name:
     for augmenter in augmenter_name:
+        if dataset == "FCREPO" and augmenter == "OCR":
+            continue
         ml = ML_Classification(dataset, augmenter, 1, 'distilbert')
         ml.refine_origin_data()
         print(ml.len_data)
