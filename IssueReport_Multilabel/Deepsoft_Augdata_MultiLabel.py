@@ -120,7 +120,7 @@ class ML_Classification:
     def set_model(self):
         self.model = MultiLabelClassificationModel(self.nlp_model_name, self.nlp_model[self.nlp_model_name], num_labels = self.labels_num, 
         args = {'output_dir': '/data/a22106/Deepsoft_C_Multilabel/{}_{}_{}_{}/'.format(self.dataset_name, self.nlp_model_name, self.augmenter_name, self.aug_mul), 
-        'overwrite_output_dir': True, 'num_train_epochs': 200, 'train_batch_size': 100, 'eval_batch_size': 100, 'max_seq_length': 128, 'learning_rate': 0.02})
+        'overwrite_output_dir': True, 'num_train_epochs': 200, 'train_batch_size': 100, 'eval_batch_size': 100, 'max_seq_length': 128, 'learning_rate': 0.002})
         
 
     def train_model(self):
@@ -132,9 +132,47 @@ class ML_Classification:
     #def predict(self):
     #    self.preds, self.outputs = self.model.predict(self.test_data)
 
+# Deepsoft-C recall method
+def recall(actual, estimate, startK, stopK, stepK):
+    recall_k = []
+    for k in range(startK, stopK + 1, stepK):
+        if k == 0:
+            k = 1
+        m = len(actual)
+        sum_recall = 0.0
+        for j in range(len(actual)):
+            y_true = np.argwhere(actual[j])
+            y_pred = estimate[j].argsort()[-k:]
+            # print y_true
+            # print y_pred
+            intersect = (y_true == y_pred).sum()
+            # print intersect
+            # print (len(y_true))
+            # print intersect / float(len(y_true))
+            sum_recall = sum_recall + (intersect / float(len(y_true)))
+            # print sum_recall
+        recall_k.append(sum_recall / float(m))
+        # print m
+        print('Recall@' + str(k) + ': {:.4f}'.format(sum_recall / float(m)))
+    return recall_k
+
+'''startK = 1
+stepK = 1
+stopK = 30
+
+print("Project:" + project)
+
+path_output = 'Other_DL/output/'
+
+recall_k = recall(y_test, y_pred, startK, stopK, stepK)
+
+np.savetxt(path_output + project + "_recall_" + str(startK) + "_" + str(stopK)+ "_v.csv", recall_k, delimiter=",", fmt='%1.4f')
+with open(path_output + "performance" + "_recall_" + str(startK) + "_" + str(stopK)+ ".csv", 'a') as myoutput:
+  myoutput.write(project + "," + ",".join(map(str, recall_k)) + '\n')'''
+
 dataset_name = ['FCREPO', 'ISLANDORA']
 #augmenter_name = ["OCR", "Keyboard", "Spelling", "ContextualWordEmbs", "Synonym", "Antonym", "Split"]
-augmenter_name = ["ContextualWordEmbs", "Synonym", "Split"]
+augmenter_name = ["ContextualWordEmbs", "Synonym", "Antonym", "Split"]
 nlp_model = ['bert', 'distilbert', 'robert']
 
 
