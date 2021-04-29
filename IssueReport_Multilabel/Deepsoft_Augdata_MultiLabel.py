@@ -177,10 +177,9 @@ nlp_model = ['bert', 'distilbert', 'robert']
 
 
 for dataset in dataset_name:
-    ml = ML_Classification(dataset, augmenter, 1, 'distilbert')
+    ml = ML_Classification(dataset, "OCR", 1, 'distilbert')
     ml.refine_origin_data()
     print(ml.len_data)
-    ml.labels_to_int()
     ml.set_model()
     print(ml.train_data)
     print(ml.eval_data.sort_index())
