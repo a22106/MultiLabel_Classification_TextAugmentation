@@ -120,7 +120,7 @@ class ML_Classification:
     def set_model(self):
         self.model = MultiLabelClassificationModel(self.nlp_model_name, self.nlp_model[self.nlp_model_name], num_labels = self.labels_num, 
         args = {'output_dir': '/data/a22106/Deepsoft_C_Multilabel/{}_{}_{}_{}/'.format(self.dataset_name, self.nlp_model_name, self.augmenter_name, self.aug_mul), 
-        'overwrite_output_dir': True, 'num_train_epochs': 200, 'train_batch_size': 100, 'eval_batch_size': 100, 'max_seq_length': 128, 'learning_rate': 0.002})
+        'overwrite_output_dir': True, 'num_train_epochs': 400, 'train_batch_size': 100, 'eval_batch_size': 100, 'max_seq_length': 128, 'learning_rate': 0.0025})
         
 
     def train_model(self):
@@ -170,26 +170,27 @@ np.savetxt(path_output + project + "_recall_" + str(startK) + "_" + str(stopK)+ 
 with open(path_output + "performance" + "_recall_" + str(startK) + "_" + str(stopK)+ ".csv", 'a') as myoutput:
   myoutput.write(project + "," + ",".join(map(str, recall_k)) + '\n')'''
 
-dataset_name = ['FCREPO', 'ISLANDORA']
-#augmenter_name = ["OCR", "Keyboard", "Spelling", "ContextualWordEmbs", "Synonym", "Antonym", "Split"]
-augmenter_name = ["ContextualWordEmbs", "Synonym", "Antonym", "Split"]
+dataset_name = ['ISLANDORA']
+augmenter_name = ["OCR", "Keyboard", "Spelling", "ContextualWordEmbs", "Synonym", "Antonym", "Split"]
+#augmenter_name = ["ContextualWordEmbs", "Synonym", "Antonym", "Split"]
 nlp_model = ['bert', 'distilbert', 'robert']
 
 
 for dataset in dataset_name:
+    ml = ML_Classification(dataset, augmenter, 1, 'distilbert')
+    ml.refine_origin_data()
+    print(ml.len_data)
+    ml.labels_to_int()
+    ml.set_model()
+    print(ml.train_data)
+    print(ml.eval_data.sort_index())
+    ml.train_model()
+    ml.eval_model()
+
     for augmenter in augmenter_name:
         if dataset == "FCREPO" and augmenter == "OCR":
             continue
-        ml = ML_Classification(dataset, augmenter, 1, 'distilbert')
-        ml.refine_origin_data()
-        print(ml.len_data)
-        ml.labels_to_int()
-        ml.set_model()
-        print(ml.train_data)
-        print(ml.eval_data.sort_index())
-        ml.train_model()
-        ml.eval_model()
-        for times in range(3, 8, 2):
+        for times in range(2, 8):
             ml = ML_Classification(dataset, augmenter, times, 'distilbert')
             ml.refine_origin_data()
             print(ml.len_data)
