@@ -172,9 +172,9 @@ try:
         with open(path_output + "performance" + "_recall_" + str(startK) + "_" + str(stopK)+ ".csv", 'a') as myoutput:
         myoutput.write(project + "," + ",".join(map(str, recall_k)) + '\n')'''
 
-        dataset_name = ['ISLANDORA']
-        #augmenter_name = ["OCR", "Keyboard", "Spelling", "ContextualWordEmbs", "Synonym", "Antonym", "Split"]
-        augmenter_name = ["Spelling", "ContextualWordEmbs", "Synonym", "Antonym", "Split"]
+        dataset_name = ['FCREPO', 'HADOOP']
+        augmenter_name = ["OCR", "Keyboard", "Spelling", "ContextualWordEmbs", "Synonym", "Antonym", "Split"]
+        #augmenter_name = ["Spelling", "ContextualWordEmbs", "Synonym", "Antonym", "Split"]
         nlp_model = ['bert', 'distilbert', 'robert']
 
 
