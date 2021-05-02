@@ -122,7 +122,7 @@ try:
             def set_model(self):
                 self.model = MultiLabelClassificationModel(self.nlp_model_name, self.nlp_model[self.nlp_model_name], num_labels = self.labels_num, 
                 args = {'output_dir': '/data/a22106/Deepsoft_C_Multilabel/{}_{}_{}_{}/'.format(self.dataset_name, self.nlp_model_name, self.augmenter_name, self.aug_mul), 
-                'overwrite_output_dir': True, 'num_train_epochs': 200, 'train_batch_size': 100, 'eval_batch_size': 100, 'max_seq_length': 128, 'learning_rate': 0.001})
+                'overwrite_output_dir': True, 'num_train_epochs': 200, 'train_batch_size': 100, 'eval_batch_size': 100, 'max_seq_length': 128, 'learning_rate': 0.002})
                 
 
             def train_model(self):
@@ -173,8 +173,8 @@ try:
         myoutput.write(project + "," + ",".join(map(str, recall_k)) + '\n')'''
 
         dataset_name = ['FCREPO', 'HADOOP']
-        augmenter_name = ["OCR", "Keyboard", "Spelling", "ContextualWordEmbs", "Synonym", "Antonym", "Split"]
-        #augmenter_name = ["Spelling", "ContextualWordEmbs", "Synonym", "Antonym", "Split"]
+        #augmenter_name = ["OCR", "Keyboard", "Spelling", "ContextualWordEmbs", "Synonym", "Antonym", "Split"]
+        augmenter_name = ["ContextualWordEmbs", "Synonym", "Antonym", "Split"]
         nlp_model = ['bert', 'distilbert', 'robert']
 
 
