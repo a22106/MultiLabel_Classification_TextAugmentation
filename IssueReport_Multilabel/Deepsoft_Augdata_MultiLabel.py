@@ -10,6 +10,13 @@ import os
 import inspect
 import re
 
+try:
+    with tf.device(‘/device:GPU:1’):
+        # Code
+    except RuntimeError as e:
+        print(e)
+
+os.environ['CUDA_VISIBLE_DEVICES'] = "1"
 
 MDL_LABEL_NUM = 89
 JRA_LABEL_NUM = 142
@@ -120,7 +127,7 @@ class ML_Classification:
     def set_model(self):
         self.model = MultiLabelClassificationModel(self.nlp_model_name, self.nlp_model[self.nlp_model_name], num_labels = self.labels_num, 
         args = {'output_dir': '/data/a22106/Deepsoft_C_Multilabel/{}_{}_{}_{}/'.format(self.dataset_name, self.nlp_model_name, self.augmenter_name, self.aug_mul), 
-        'overwrite_output_dir': True, 'num_train_epochs': 400, 'train_batch_size': 100, 'eval_batch_size': 100, 'max_seq_length': 128, 'learning_rate': 0.0025})
+        'overwrite_output_dir': True, 'num_train_epochs': 200, 'train_batch_size': 100, 'eval_batch_size': 100, 'max_seq_length': 128, 'learning_rate': 0.001})
         
 
     def train_model(self):
@@ -171,8 +178,8 @@ with open(path_output + "performance" + "_recall_" + str(startK) + "_" + str(sto
   myoutput.write(project + "," + ",".join(map(str, recall_k)) + '\n')'''
 
 dataset_name = ['ISLANDORA']
-augmenter_name = ["OCR", "Keyboard", "Spelling", "ContextualWordEmbs", "Synonym", "Antonym", "Split"]
-#augmenter_name = ["ContextualWordEmbs", "Synonym", "Antonym", "Split"]
+#augmenter_name = ["OCR", "Keyboard", "Spelling", "ContextualWordEmbs", "Synonym", "Antonym", "Split"]
+augmenter_name = ["Spelling", "ContextualWordEmbs", "Synonym", "Antonym", "Split"]
 nlp_model = ['bert', 'distilbert', 'robert']
 
 
