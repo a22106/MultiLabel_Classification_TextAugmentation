@@ -13,12 +13,6 @@ import tensorflow as tf
 
 try:
     with tf.device('/device:GPU:1'):
-            
-
-    
-
-        os.environ['CUDA_VISIBLE_DEVICES'] = "1"
-
         MDL_LABEL_NUM = 89
         JRA_LABEL_NUM = 142
         ISLANDORA_LABEL_NUM = 67
@@ -210,3 +204,5 @@ try:
 
 except RuntimeError as e:
         print(e)
+
+os.environ['CUDA_VISIBLE_DEVICES'] = "1"
