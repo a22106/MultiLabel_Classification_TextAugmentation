@@ -52,9 +52,9 @@ class ML_Classification:
 
 
         # 데이터 위치 data location
-        self.data_location_ori = 'Dataset/Deepsoft_IssueData/{}.csv'.format(self.dataset_name)
+        self.data_location_ori = '../Dataset/Deepsoft_IssueData/{}.csv'.format(self.dataset_name)
 
-        self.data_location_aug = 'Dataset/Deepsoft_IssueData_Aug/{}_{}_{}.csv'.format(self.dataset_name, self.augmentation_type, self.augmenter_name)     
+        self.data_location_aug = '../Dataset/Deepsoft_IssueData_Aug/{}_{}_{}.csv'.format(self.dataset_name, self.augmentation_type, self.augmenter_name)     
         
 
         # 데이터 변수 입력
@@ -183,20 +183,19 @@ np.savetxt(path_output + project + "_recall_" + str(startK) + "_" + str(stopK)+ 
 with open(path_output + "performance" + "_recall_" + str(startK) + "_" + str(stopK)+ ".csv", 'a') as myoutput:
 myoutput.write(project + "," + ",".join(map(str, recall_k)) + '\n')'''
 
-dataset_name = ['FCREPO', 'HADOOP']
+dataset_name = ['HADOOP', 'FCREPO']
 #augmenter_name = ["OCR", "Keyboard", "Spelling", "ContextualWordEmbs", "Synonym", "Antonym", "Split"]
 augmenter_name = ["ContextualWordEmbs", "Synonym", "Antonym", "Split"]
 nlp_model = ['bert', 'distilbert', 'robert']
 
-ml = ML_Classification("HADOOP", "ContextualWordEmbs", 1, 'distilbert')
+'''ml = ML_Classification("HADOOP", "ContextualWordEmbs", 1, 'distilbert')
 ml.refine_origin_data()
 print(ml.len_data)
 print(ml.data)
 print(ml.train_data)
 print(ml.eval_data)
-print(ml.x_train)
+print(ml.x_train)'''
 
-'''
 try:
     with tf.device('/device:GPU:1'):
         for dataset in dataset_name:
@@ -227,5 +226,3 @@ except RuntimeError as e:
         print(e)
 
 os.environ['CUDA_VISIBLE_DEVICES'] = "1"
-
-'''
