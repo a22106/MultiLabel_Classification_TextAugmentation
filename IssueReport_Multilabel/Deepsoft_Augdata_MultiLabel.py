@@ -178,7 +178,7 @@ class ML_Classification:
 
     def test_model(self):
         self.to_predict = list(self.test_data['text'].apply(lambda x: x.replace('\n', ' ')).tolist())
-        preds, outputs = self.model.predict(self.test_data)
+        preds, outputs = self.model.predict(self.to_predict)
 
         sub_df = pd.DataFrame(outputs, columns = list(ml.data_ori.columns[4:-2]))
 
