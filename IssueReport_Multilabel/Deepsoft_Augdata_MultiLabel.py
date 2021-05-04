@@ -11,10 +11,7 @@ import inspect
 import re
 import tensorflow as tf
 
-from keras.preprocessing.text import Tokenizer
-from keras.preprocessing.sequence import pad_sequences
-from keras.utils import to_categorical
-
+import json, re, nltk, string
 
 MDL_LABEL_NUM = 89
 JRA_LABEL_NUM = 142
@@ -64,6 +61,7 @@ class ML_Classification:
         self.eval_index = []
 
 
+
     def refine_origin_data(self):
         data_ori = self.data_ori
         
@@ -72,27 +70,45 @@ class ML_Classification:
         for i in range(len(data_onehot)):
             data_label.append(list(data_onehot.iloc[i]))
 
-        
         # make 'data' value
         data_text = pd.Series(list(data_ori["title"] + ' ' + data_ori['description']), index = data_ori.index)
-
-
-        tokenizer = Tokenizer(filters='!"#$%&()*+,-./:;<=>?@[\\]^_`{|}~\t\n\'', lower=True)
-        tokenizer.fit_on_texts(data_text)
-        dataSequences = tokenizer.texts_to_sequences(data_text)
-        self.x_data = pad_sequences(dataSequences)
-        self.word_index = tokenizer.word_index
-
-
         #data = data.drop(columns = ['issuekey', 'title', 'description', 'component'])
-        data_ori = pd.DataFrame(data = {'text': data_text, 'labels': data_label})
+        
 
+        refined_data = []
+        for item in data_text:
+            #1. Remove \r 
+            current_desc = item.replace('\r', ' ')    
+            #2. Remove URLs
+            current_desc = re.sub(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', '', current_desc)    
+            #4. Remove hex code
+            current_desc = re.sub(r'(\w+)0x\w+', '', current_desc) 
+            #5. Change to lower case
+            current_desc = current_desc.lower()   
+            #6. Tokenize
+            #current_desc_tokens = tokenizer(current_desc, add_special_tokens= True)
+            #7. Strip trailing punctuation marks    
+            #current_desc_filter = [word.strip(string.punctuation) for word in current_desc_tokens]     
+            #8. Join the lists
+            #current_data = current_desc_filter
+            #current_data = list(filter(None, current_data))
+            refined_data.append(current_desc)
+
+        #data_ori = pd.DataFrame(data = {'text': refined_data, 'labels': data_label})
+        data_ori['text'] = refined_data
+        data_ori['labels'] = data_label
         self.data_ori = data_ori
-
         # 오리지날 데이터를 train, eval데이터로 분리
-        self.train_data_ori, self.eval_data_ori = train_test_split(data_ori, test_size = 0.3)
+
+        train_size = 0.6
+        test_size = 0.2
+        eval_size = 0.2
+        self.train_data_ori, self.eval_data_ori = train_test_split(data_ori, train_size = train_size)
+        self.eval_data_ori, self.test_data_ori = train_test_split(self.eval_data_ori, test_size = test_size)
         self.eval_data = self.eval_data_ori
         self.train_data = self.train_data_ori
+        self.test_data = self.test_data_ori
+
 
     
     # 불러온 정제된 데이터 one hot을 str에서 list로 바꾸는 작업
@@ -101,6 +117,27 @@ class ML_Classification:
             return        
 
         data = self.data[: self.len_data * self.aug_mul] 
+
+        refined_data = []
+        for item in data['text']:
+            #1. Remove \r 
+            current_desc = item.replace('\r', ' ')    
+            #2. Remove URLs
+            current_desc = re.sub(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+', '', current_desc)    
+            #4. Remove hex code
+            current_desc = re.sub(r'(\w+)0x\w+', '', current_desc) 
+            #5. Change to lower case
+            current_desc = current_desc.lower()   
+            #6. Tokenize
+            #current_desc_tokens = tokenizer(current_desc, add_special_tokens= True)
+            #7. Strip trailing punctuation marks    
+            #current_desc_filter = [word.strip(string.punctuation) for word in current_desc_tokens]     
+            #8. Join the lists
+            #current_data = current_desc_filter
+            #current_data = list(filter(None, current_data))
+            refined_data.append(current_desc)
+
+        data['text'] = refined_data
 
         changeChar = ' [],'
         for i in range(len(data)):
@@ -115,7 +152,7 @@ class ML_Classification:
         for aug_num in range(self.aug_mul):
             iidf2 = [i + self.len_data* aug_num for i in eval_index_list]
             self.eval_index = self.eval_index + iidf2
-
+        self.data = data
         self.train_data = data.drop(self.eval_index)
         self.train_data = self.train_data.sample(frac=1).reset_index(drop=True)
 
@@ -133,7 +170,7 @@ class ML_Classification:
     def set_model(self): # epochs: 200, batch size: 100, learning rate 0.002
         self.model = MultiLabelClassificationModel(self.nlp_model_name, self.nlp_model[self.nlp_model_name], num_labels = self.labels_num, 
         args = {'output_dir': '/data/a22106/Deepsoft_C_Multilabel/{}_{}_{}_{}/'.format(self.dataset_name, self.nlp_model_name, self.augmenter_name, self.aug_mul), 
-        'overwrite_output_dir': True, 'num_train_epochs': 200, 'train_batch_size': 100, 'eval_batch_size': 100, 'max_seq_length': 128, 'learning_rate': 0.0002})
+        'overwrite_output_dir': True, 'save_steps': -1, 'num_train_epochs': 200, 'train_batch_size': 100, 'eval_batch_size': 100, 'max_seq_length': 128, 'learning_rate': 0.001})
         
 
     def train_model(self):
@@ -141,7 +178,18 @@ class ML_Classification:
     
     def eval_model(self):
         self.result, self.model_outputs, self.wrong_predictions = self.model.eval_model(self.eval_data)
-    
+
+    def test_model(self):
+        self.to_predict = self.test_data.comment_text.apply(lambda x: x)
+        self.preds, outputs = self.model.predict(to_predict)
+
+        sub_df = pd.DataFrame(outputs, columns = list(ml.data_ori.columns[4:-2]))
+
+        sub_df['id'] = test_df['id']
+        sub_df = sub_df[['id'].append(list(ml.data_ori.columns[4:-2]))]
+
+        sub_df.to_csv('outputs/submission.csv', index = False)
+
     #def predict(self):
     #    self.preds, self.outputs = self.model.predict(self.test_data)
 
@@ -183,9 +231,9 @@ np.savetxt(path_output + project + "_recall_" + str(startK) + "_" + str(stopK)+ 
 with open(path_output + "performance" + "_recall_" + str(startK) + "_" + str(stopK)+ ".csv", 'a') as myoutput:
 myoutput.write(project + "," + ",".join(map(str, recall_k)) + '\n')'''
 
-dataset_name = ['HADOOP', 'FCREPO']
+dataset_name = ['FCREPO', 'HADOOP']
 #augmenter_name = ["OCR", "Keyboard", "Spelling", "ContextualWordEmbs", "Synonym", "Antonym", "Split"]
-augmenter_name = ["ContextualWordEmbs", "Synonym", "Antonym", "Split"]
+augmenter_name = ["Keyboard", "ContextualWordEmbs", "Synonym", "Antonym", "Split"]
 nlp_model = ['bert', 'distilbert', 'robert']
 
 '''ml = ML_Classification("HADOOP", "ContextualWordEmbs", 1, 'distilbert')
@@ -196,33 +244,24 @@ print(ml.train_data)
 print(ml.eval_data)
 print(ml.x_train)'''
 
-try:
-    with tf.device('/device:GPU:1'):
-        for dataset in dataset_name:
-            ml = ML_Classification(dataset, "OCR", 1, 'distilbert')
+for dataset in dataset_name:
+    ml = ML_Classification(dataset, "Keyboard", 1, 'distilbert')
+    ml.refine_origin_data()
+    print(ml.len_data)
+    ml.set_model()
+    print(ml.train_data)
+    print(ml.eval_data.sort_index())
+    ml.train_model()
+    ml.eval_model()
+
+    for augmenter in augmenter_name:
+        for times in range(2, 8):
+            ml = ML_Classification(dataset, augmenter, times, 'distilbert')
             ml.refine_origin_data()
             print(ml.len_data)
+            ml.labels_to_int()
             ml.set_model()
             print(ml.train_data)
             print(ml.eval_data.sort_index())
             ml.train_model()
             ml.eval_model()
-
-            for augmenter in augmenter_name:
-                if dataset == "FCREPO" and augmenter == "OCR":
-                    continue
-                for times in range(2, 8):
-                    ml = ML_Classification(dataset, augmenter, times, 'distilbert')
-                    ml.refine_origin_data()
-                    print(ml.len_data)
-                    ml.labels_to_int()
-                    ml.set_model()
-                    print(ml.train_data)
-                    print(ml.eval_data.sort_index())
-                    ml.train_model()
-                    ml.eval_model()
-
-except RuntimeError as e:
-        print(e)
-
-os.environ['CUDA_VISIBLE_DEVICES'] = "1"
