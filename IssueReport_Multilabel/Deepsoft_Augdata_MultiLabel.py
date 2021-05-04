@@ -253,6 +253,7 @@ for dataset in dataset_name:
     print(ml.eval_data.sort_index())
     ml.train_model()
     ml.eval_model()
+    ml.test_model()
 
     for augmenter in augmenter_name:
         for times in range(2, 8):
@@ -265,3 +266,4 @@ for dataset in dataset_name:
             print(ml.eval_data.sort_index())
             ml.train_model()
             ml.eval_model()
+            ml.test_model()
