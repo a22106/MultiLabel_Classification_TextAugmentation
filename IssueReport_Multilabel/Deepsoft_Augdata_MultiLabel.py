@@ -59,6 +59,7 @@ class ML_Classification:
         self.data_ori = pd.read_csv(self.data_location_ori) # 원본 데이터
         self.len_data = len(self.data_ori)
         self.eval_index = []
+        self.test_index = []
 
 
 
@@ -104,7 +105,7 @@ class ML_Classification:
         test_size = 0.2
         eval_size = 0.2
         self.train_data_ori, self.eval_data_ori = train_test_split(data_ori, train_size = train_size)
-        self.eval_data_ori, self.test_data_ori = train_test_split(self.eval_data_ori, test_size = test_size)
+        self.eval_data_ori, self.test_data_ori = train_test_split(self.eval_data_ori, test_size = 0.5)
         self.eval_data = self.eval_data_ori
         self.train_data = self.train_data_ori
         self.test_data = self.test_data_ori
@@ -148,29 +149,25 @@ class ML_Classification:
         
         # 증강데이터의 train_data에서 evaluation부분 제거
         eval_index_list = list(self.eval_data.index)
+        test_index_list = list(self.test_data.index)
         
         for aug_num in range(self.aug_mul):
             iidf2 = [i + self.len_data* aug_num for i in eval_index_list]
             self.eval_index = self.eval_index + iidf2
+            iidf3 = [x + self.len_data* aug_num for x in test_index_list]
+            self.test_index = self.test_index + iidf3
+
+
         self.data = data
         self.train_data = data.drop(self.eval_index)
+        self.train_data = self.train_data.drop(self.test_index)
         self.train_data = self.train_data.sample(frac=1).reset_index(drop=True)
-
-    # train, evaluation 데이터로 나누기 // 사용 안함
-    def _split_data_eval(self, random_state = None):
-        train_data_ori, eval_data_ori = train_test_split(self.data_ori, test_size = 0.3, random_state = random_state)
-
-        eval_data_indexList = eval_data_ori.index.append(eval_data_ori.index * 2)
-        data = data.drop(eval_data_indexList)
-        
-        self.train_data, self.eval_data = train_test_split(data, test_size = 0.3, random_state = random_state)
-
 
 # 모델 parameter 설정
     def set_model(self): # epochs: 200, batch size: 100, learning rate 0.002
         self.model = MultiLabelClassificationModel(self.nlp_model_name, self.nlp_model[self.nlp_model_name], num_labels = self.labels_num, 
         args = {'output_dir': '/data/a22106/Deepsoft_C_Multilabel/{}_{}_{}_{}/'.format(self.dataset_name, self.nlp_model_name, self.augmenter_name, self.aug_mul), 
-        'overwrite_output_dir': True, 'save_steps': -1, 'num_train_epochs': 200, 'train_batch_size': 100, 'eval_batch_size': 100, 'max_seq_length': 128, 'learning_rate': 0.001})
+        'overwrite_output_dir': True, 'save_steps': -1, 'num_train_epochs': 50, 'train_batch_size': 100, 'eval_batch_size': 100, 'max_seq_length': 128, 'learning_rate': 0.002})
         
 
     def train_model(self):
@@ -180,8 +177,8 @@ class ML_Classification:
         self.result, self.model_outputs, self.wrong_predictions = self.model.eval_model(self.eval_data)
 
     def test_model(self):
-        self.to_predict = self.test_data.comment_text.apply(lambda x: x)
-        self.preds, outputs = self.model.predict(to_predict)
+        #self.to_predict = self.test_data.comment_text.apply(lambda x: x.replace('\n', ' ')).tolist()
+        self.preds, outputs = self.model.predict(self.test_data)
 
         sub_df = pd.DataFrame(outputs, columns = list(ml.data_ori.columns[4:-2]))
 
@@ -189,6 +186,9 @@ class ML_Classification:
         sub_df = sub_df[['id'].append(list(ml.data_ori.columns[4:-2]))]
 
         sub_df.to_csv('outputs/submission.csv', index = False)
+
+
+
 
     #def predict(self):
     #    self.preds, self.outputs = self.model.predict(self.test_data)
