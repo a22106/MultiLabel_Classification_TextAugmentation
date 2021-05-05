@@ -164,9 +164,9 @@ class ML_Classification:
         self.train_data = self.train_data.sample(frac=1).reset_index(drop=True)
 
 # 모델 parameter 설정
-    def set_model(self): # epochs: 200, batch size: 100, learning rate 0.002
+    def set_model(self, repeat): # epochs: 200, batch size: 100, learning rate 0.002
         self.model = MultiLabelClassificationModel(self.nlp_model_name, self.nlp_model[self.nlp_model_name], num_labels = self.labels_num, 
-        args = {'output_dir': '/data/a22106/Deepsoft_C_Multilabel/{}_{}_{}_{}_re/'.format(self.dataset_name, self.nlp_model_name, self.augmenter_name, self.aug_mul), 
+        args = {'output_dir': '/data/a22106/Deepsoft_C_Multilabel/{}_{}_{}_{}_re{}/'.format(self.dataset_name, self.nlp_model_name, self.augmenter_name, self.aug_mul, repeat), 
         'overwrite_output_dir': True, 'save_steps': -1, 'num_train_epochs': 200, 'train_batch_size': 100, 'eval_batch_size': 100, 'max_seq_length': 128, 'learning_rate': 0.0008})
         
 
@@ -223,7 +223,7 @@ np.savetxt(path_output + project + "_recall_" + str(startK) + "_" + str(stopK)+ 
 with open(path_output + "performance" + "_recall_" + str(startK) + "_" + str(stopK)+ ".csv", 'a') as myoutput:
 myoutput.write(project + "," + ",".join(map(str, recall_k)) + '\n')'''
 
-dataset_name = ['FCREPO', 'HADOOP']
+dataset_name = ['FCREPO']
 #augmenter_name = ["OCR", "Keyboard", "Spelling", "ContextualWordEmbs", "Synonym", "Antonym", "Split"]
 augmenter_name = ["Keyboard", "ContextualWordEmbs", "Synonym", "Antonym", "Split"]
 nlp_model = ['bert', 'distilbert', 'robert']
@@ -237,25 +237,27 @@ print(ml.eval_data)
 print(ml.x_train)'''
 
 for dataset in dataset_name:
-    ml = ML_Classification(dataset, "Keyboard", 1, 'distilbert')
-    ml.refine_origin_data()
-    print(ml.len_data)
-    ml.set_model()
-    print(ml.train_data)
-    print(ml.eval_data.sort_index())
-    ml.train_model()
-    ml.eval_model()
-    ml.test_model()
-
-    for augmenter in augmenter_name:
-        for times in range(2, 8):
-            ml = ML_Classification(dataset, augmenter, times, 'distilbert')
-            ml.refine_origin_data()
-            print(ml.len_data)
-            ml.labels_to_int()
-            ml.set_model()
-            print(ml.train_data)
-            print(ml.eval_data.sort_index())
-            ml.train_model()
-            ml.eval_model()
-            ml.test_model()
+    for repeat1 in range(5):
+        ml = ML_Classification(dataset, "Keyboard", 1, 'distilbert')
+        ml.refine_origin_data()
+        print(ml.len_data)
+        ml.set_model(repeat1)
+        print(ml.train_data)
+        print(ml.eval_data.sort_index())
+        ml.train_model()
+        ml.eval_model()
+        ml.test_model()
+        
+        for augmenter in augmenter_name:
+            for times in range(3, 8, 2):
+                for repeat2 in range(5):
+                    ml = ML_Classification(dataset, augmenter, times, 'distilbert')
+                    ml.refine_origin_data()
+                    print(ml.len_data)
+                    ml.labels_to_int()
+                    ml.set_model(repeat2)
+                    print(ml.train_data)
+                    print(ml.eval_data.sort_index())
+                    ml.train_model()
+                    ml.eval_model()
+                    ml.test_model()
