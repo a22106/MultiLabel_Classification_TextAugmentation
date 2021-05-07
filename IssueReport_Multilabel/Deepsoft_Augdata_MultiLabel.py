@@ -225,7 +225,7 @@ myoutput.write(project + "," + ",".join(map(str, recall_k)) + '\n')'''
 
 dataset_name = ['FCREPO']
 #augmenter_name = ["OCR", "Keyboard", "Spelling", "ContextualWordEmbs", "Synonym", "Antonym", "Split"]
-augmenter_name = ["Keyboard", "ContextualWordEmbs", "Synonym", "Antonym", "Split"]
+augmenter_name = ["ContextualWordEmbs", "Synonym", "Antonym", "Split"]
 nlp_model = ['bert', 'distilbert', 'robert']
 
 '''ml = ML_Classification("HADOOP", "ContextualWordEmbs", 1, 'distilbert')
