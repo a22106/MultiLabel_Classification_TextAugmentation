@@ -223,9 +223,9 @@ np.savetxt(path_output + project + "_recall_" + str(startK) + "_" + str(stopK)+ 
 with open(path_output + "performance" + "_recall_" + str(startK) + "_" + str(stopK)+ ".csv", 'a') as myoutput:
 myoutput.write(project + "," + ",".join(map(str, recall_k)) + '\n')'''
 
-dataset_name = ['FCREPO']
+dataset_name = ['HADOOP', 'FCREPO']
 #augmenter_name = ["OCR", "Keyboard", "Spelling", "ContextualWordEmbs", "Synonym", "Antonym", "Split"]
-augmenter_name = ["Synonym", "Antonym", "Split"]
+augmenter_name = ["Split", "Spelling", "ContextualWordEmbs", "Synonym", "Antonym"]
 nlp_model = ['bert', 'distilbert', 'robert']
 
 '''ml = ML_Classification("HADOOP", "ContextualWordEmbs", 1, 'distilbert')
@@ -239,8 +239,6 @@ print(ml.x_train)'''
 for dataset in dataset_name:
     for augmenter in augmenter_name:
         for times in range(3, 8, 2):
-            if augmenter == "Synonym" and times <7:
-                continue
             for repeat2 in range(5):
                 ml = ML_Classification(dataset, augmenter, times, 'distilbert')
                 ml.refine_origin_data()
@@ -252,4 +250,4 @@ for dataset in dataset_name:
                 print(ml.eval_data.sort_index())
                 ml.train_model()
                 ml.eval_model()
-                ml.test_model()
+                #ml.test_model()
