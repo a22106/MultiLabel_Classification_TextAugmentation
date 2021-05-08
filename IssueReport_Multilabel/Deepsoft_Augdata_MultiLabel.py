@@ -225,7 +225,7 @@ myoutput.write(project + "," + ",".join(map(str, recall_k)) + '\n')'''
 
 dataset_name = ['FCREPO']
 #augmenter_name = ["OCR", "Keyboard", "Spelling", "ContextualWordEmbs", "Synonym", "Antonym", "Split"]
-augmenter_name = ["ContextualWordEmbs", "Synonym", "Antonym", "Split"]
+augmenter_name = ["Synonym", "Antonym", "Split"]
 nlp_model = ['bert', 'distilbert', 'robert']
 
 '''ml = ML_Classification("HADOOP", "ContextualWordEmbs", 1, 'distilbert')
@@ -238,10 +238,13 @@ print(ml.x_train)'''
 
 for dataset in dataset_name:
     for augmenter in augmenter_name:
-        for times in range(1, 8, 2):
+        for times in range(3, 8, 2):
+            if augmenter == "Synonym" and times <7:
+                continue
             for repeat2 in range(5):
                 ml = ML_Classification(dataset, augmenter, times, 'distilbert')
                 ml.refine_origin_data()
+                print("augment: {}".format(times))
                 print(ml.len_data)
                 ml.labels_to_int()
                 ml.set_model(repeat2)
