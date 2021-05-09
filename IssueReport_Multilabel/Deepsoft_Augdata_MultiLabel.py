@@ -225,7 +225,7 @@ myoutput.write(project + "," + ",".join(map(str, recall_k)) + '\n')'''
 
 dataset_name = ['HADOOP', 'FCREPO']
 #augmenter_name = ["OCR", "Keyboard", "Spelling", "ContextualWordEmbs", "Synonym", "Antonym", "Split"]
-augmenter_name = ["Split", "Spelling", "ContextualWordEmbs", "Synonym", "Antonym"]
+augmenter_name = ["ContextualWordEmbs", "Synonym", "Antonym", "Split"]
 nlp_model = ['bert', 'distilbert', 'robert']
 
 '''ml = ML_Classification("HADOOP", "ContextualWordEmbs", 1, 'distilbert')
@@ -235,6 +235,8 @@ print(ml.data)
 print(ml.train_data)
 print(ml.eval_data)
 print(ml.x_train)'''
+
+count1 = 0
 
 for dataset in dataset_name:
     for augmenter in augmenter_name:
