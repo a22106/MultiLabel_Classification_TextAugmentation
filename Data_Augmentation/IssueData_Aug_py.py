@@ -18,10 +18,10 @@ aug_char_Keyboard = nac.KeyboardAug()
 aug_word_Spelling = naw.SpellingAug()
 #aug_word_WordEmbedng = naw.WordEmbsAug(model_type = 'word2vec', model_path=model_dir+'GoogleNews-vectors-negative300.bin', action="insert")
 #aug_word_TfIdfAug = naw.TfIdfAug(model_path = os.environ.get("MODEL_DIR"), action = 'insert')
-aug_word_ContextualWordEmbs = naw.ContextualWordEmbsAug(model_path = 'bert-base-uncased', action = 'insert')
+'''aug_word_ContextualWordEmbs = naw.ContextualWordEmbsAug(model_path = 'bert-base-uncased', action = 'insert')
 aug_word_Synonym = naw.SynonymAug(aug_src = 'wordnet')
 aug_word_Antonym = naw.AntonymAug()
-aug_word_Split = naw.SplitAug()
+aug_word_Split = naw.SplitAug()'''
 aug_word_BackTranslation = naw.BackTranslationAug(from_model_name = 'transformer.wmt19.en-de', to_model_name = 'transformer.wmt19.de-en')
 
 def refine_data(dataset_name):
