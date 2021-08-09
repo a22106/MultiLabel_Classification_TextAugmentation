@@ -79,3 +79,5 @@ def augment_data(dataset_name, dataset, aug_target, augmenter, augmenter_name, a
 dataset_HADOOP = refine_data("HADOOP")
 dataset_FCREPO = refine_data("FCREPO")
 dataset_ISLANDORA = refine_data("ISLANDORA")
+
+augment_data("HADOOP", dataset_HADOOP, 'word', aug_word_BackTranslation, "BackTranslationAug")
