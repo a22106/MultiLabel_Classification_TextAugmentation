@@ -25,12 +25,12 @@ aug_word_Split = naw.SplitAug()'''
 ##aug_word_BackTranslation = naw.BackTranslationAug(from_model_name = 'transformer.wmt19.en-de', to_model_name = 'transformer.wmt19.de-en')
 
 issueReport = pd.read_csv('D:/BugTriage/Chrome_report_Deeptriage.csv')
-print(issueReport)
+
 
 
 '''def refine_data(dataset_name):
     # 원본 HADOOP csv데이터 불러와서 정제하기
-    issueReport = pd.read_csv("/home/a22106/DeepTriage/Chrome_report_Deeptriage.csv".format(dataset_name))
+    issueReport = pd.read_csv("/home/a22106/DeepTriage/Chrome_report_Deeptriage.csv")
     issueOnehot = issueReport.drop(columns = ['issuekey', 'title', 'description', 'component'])
 
     issueLabel = []
